@@ -39,7 +39,8 @@ Files:
 To run and test the project, you’ll need the following libraries installed:  
 - tkinter
 - PIL (pillow)  
-- fuzzywuzzy 
+- fuzzywuzzy
+- requests (re)
 
 ---
 
