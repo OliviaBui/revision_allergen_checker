@@ -1,0 +1,457 @@
+<html>
+<head>
+<title>attempt_combination_2.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #6aab73;}
+.s5 { color: #5f826b; font-style: italic;}
+.s6 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+attempt_combination_2.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">tkinter </span><span class="s0">as </span><span class="s1">tk</span>
+<span class="s0">from </span><span class="s1">tkinter </span><span class="s0">import </span><span class="s1">Tk</span><span class="s2">, </span><span class="s1">Canvas</span><span class="s2">, </span><span class="s1">Frame</span><span class="s2">, </span><span class="s1">Button</span><span class="s2">, </span><span class="s1">Label</span>
+<span class="s0">from </span><span class="s1">PIL </span><span class="s0">import </span><span class="s1">Image</span><span class="s2">, </span><span class="s1">ImageTk</span>
+<span class="s0">from </span><span class="s1">fuzzywuzzy </span><span class="s0">import </span><span class="s1">fuzz</span>
+<span class="s0">import </span><span class="s1">re</span>
+
+<span class="s3"># Global variables</span>
+<span class="s1">ingList </span><span class="s2">= [] </span><span class="s3"># List to store the user's product list AFTER it is cleaned up (in case they have duplicates, too many slashes, too much whitespace, detect comma use , and disable non-entries)</span>
+<span class="s1">custom_allergens </span><span class="s2">= []  </span><span class="s3"># List to store custom individual allergens user wants to screen for</span>
+<span class="s1">next_button </span><span class="s2">= </span><span class="s0">None  </span><span class="s3"># This will hold the reference to the 'Next' button (to clear textbox everytime upon return)</span>
+<span class="s1">selectedallergens </span><span class="s2">= {} </span><span class="s3"># List to store allergen categories (dictionaries) the user ticks/actually cares about screening for</span>
+
+<span class="s3">#########################################</span>
+<span class="s3"># 🏛Allergen dictionaries &amp; found_allergens 🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛🏛️🏛️🏛️🏛️️🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛️🏛</span>
+<span class="s3">#########################################</span>
+<span class="s1">allergen_categories </span><span class="s2">= {</span>
+    <span class="s4">&quot;Fragrances&quot;</span><span class="s2">: {</span><span class="s4">&quot;Amyl cinnamal&quot;</span><span class="s2">, </span><span class="s4">&quot;Amylcinnamyl alcohol&quot;</span><span class="s2">, </span><span class="s4">&quot;Anisyl alcohol&quot;</span><span class="s2">, </span><span class="s4">&quot;Benzyl alcohol&quot;</span><span class="s2">, </span><span class="s4">&quot;Benzyl benzoate&quot;</span><span class="s2">,</span>
+                   <span class="s4">&quot;Benzyl cinnamate&quot;</span><span class="s2">, </span><span class="s4">&quot;Benzyl salicylate&quot;</span><span class="s2">, </span><span class="s4">&quot;Cinnamyl alcohol&quot;</span><span class="s2">, </span><span class="s4">&quot;Cinnamaldehyde&quot;</span><span class="s2">, </span><span class="s4">&quot;Citral&quot;</span><span class="s2">,</span>
+                   <span class="s4">&quot;Citronellol&quot;</span><span class="s2">, </span><span class="s4">&quot;Coumarin&quot;</span><span class="s2">, </span><span class="s4">&quot;Eugenol&quot;</span><span class="s2">, </span><span class="s4">&quot;Farnesol&quot;</span><span class="s2">, </span><span class="s4">&quot;Geraniol&quot;</span><span class="s2">, </span><span class="s4">&quot;Hexyl cinnamaladehyde&quot;</span><span class="s2">,</span>
+                   <span class="s4">&quot;Hydroxycitronellal&quot;</span><span class="s2">, </span><span class="s4">&quot;Hydroxyisohexyl 3-cyclohexene carboxaldehyde&quot;</span><span class="s2">, </span><span class="s4">&quot;HICC&quot;</span><span class="s2">, </span><span class="s4">&quot;Lyral&quot;</span><span class="s2">,</span>
+                   <span class="s4">&quot;Isoeugenol&quot;</span><span class="s2">, </span><span class="s4">&quot;Lilial&quot;</span><span class="s2">, </span><span class="s4">&quot;d-Limonene&quot;</span><span class="s2">, </span><span class="s4">&quot;Linalool&quot;</span><span class="s2">, </span><span class="s4">&quot;Methyl 2-octynoate&quot;</span><span class="s2">, </span><span class="s4">&quot;g-Methylionone&quot;</span><span class="s2">,</span>
+                   <span class="s4">&quot;Oak moss extract&quot;</span><span class="s2">, </span><span class="s4">&quot;Tree moss extract&quot;</span><span class="s2">},</span>
+    <span class="s4">&quot;Colourants&quot;</span><span class="s2">: {</span><span class="s4">&quot;p-phenylenediamine&quot;</span><span class="s2">, </span><span class="s4">&quot;PPD&quot;</span><span class="s2">, </span><span class="s4">&quot;Coal-tar&quot;</span><span class="s2">, </span><span class="s4">&quot;Tar&quot;</span><span class="s2">, </span><span class="s4">&quot;Coal&quot;</span><span class="s2">},</span>
+    <span class="s4">&quot;Rubbers&quot;</span><span class="s2">: {</span><span class="s4">&quot;Latex&quot;</span><span class="s2">},</span>
+    <span class="s4">&quot;Preservatives&quot;</span><span class="s2">: {</span><span class="s4">&quot;Methylisothiazolinone&quot;</span><span class="s2">, </span><span class="s4">&quot;MIT&quot;</span><span class="s2">, </span><span class="s4">&quot;Methylchloroisothiazolinone&quot;</span><span class="s2">, </span><span class="s4">&quot;CMIT&quot;</span><span class="s2">, </span><span class="s4">&quot;Bronopol&quot;</span><span class="s2">,</span>
+                      <span class="s4">&quot;2-bromo-2-nitropropane-1,3-diol&quot;</span><span class="s2">, </span><span class="s4">&quot;5-bromo-5-nitro-1,3-dioxane&quot;</span><span class="s2">, </span><span class="s4">&quot;Diazolidinyl urea&quot;</span><span class="s2">, </span><span class="s4">&quot;DMDM&quot;</span><span class="s2">,</span>
+                      <span class="s4">&quot;hydantoin&quot;</span><span class="s2">, </span><span class="s4">&quot;1,3-dimethylol-5,5-dimethylhydantoin&quot;</span><span class="s2">, </span><span class="s4">&quot;Imidazolidinyl urea&quot;</span><span class="s2">,</span>
+                      <span class="s4">&quot;Sodium hydroxymethylglycinate&quot;</span><span class="s2">, </span><span class="s4">&quot;Quaternium-15&quot;</span><span class="s2">, </span><span class="s4">&quot;Dowicil200&quot;</span><span class="s2">,</span>
+                      <span class="s4">&quot;N-(3-chloroallyl)hexaminium chloride&quot;</span><span class="s2">},</span>
+    <span class="s4">&quot;Metals&quot;</span><span class="s2">: {</span><span class="s4">&quot;Nickel&quot;</span><span class="s2">, </span><span class="s4">&quot;Gold&quot;</span><span class="s2">},</span>
+<span class="s2">}</span>
+
+<span class="s3"># The allergens selected by the user for comparison (default: all categories unselected)</span>
+<span class="s1">selectedallergens </span><span class="s2">= {</span><span class="s1">category</span><span class="s2">: </span><span class="s0">False for </span><span class="s1">category </span><span class="s0">in </span><span class="s1">allergen_categories</span><span class="s2">} </span><span class="s3">#another important global variable</span>
+
+
+<span class="s3">#########################################</span>
+<span class="s3"># 🐻 Processing ingredients list: handling non-entries, commas, whitespace, slashes(/), duplicates &amp; list storage 🐻🐻🐻</span>
+<span class="s3">#########################################</span>
+<span class="s3"># &quot;store_and_print_ingredients&quot; function creates &quot;ingList&quot; variable</span>
+<span class="s0">def </span><span class="s1">store_and_print_ingredients</span><span class="s2">():</span>
+    <span class="s3"># Get the text from the textbox</span>
+    <span class="s1">ingredients_text </span><span class="s2">= </span><span class="s1">textbox</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end-1c&quot;</span><span class="s2">).</span><span class="s1">strip</span><span class="s2">()</span>
+
+    <span class="s3"># Ensure no placeholder text is included</span>
+    <span class="s0">if </span><span class="s1">ingredients_text </span><span class="s2">!= </span><span class="s4">&quot;Paste ingredients here...🌼&quot; </span><span class="s0">and </span><span class="s1">ingredients_text </span><span class="s2">!= </span><span class="s4">&quot;&quot;</span><span class="s2">:</span>
+        <span class="s3"># Split the ingredients into a list by commas</span>
+        <span class="s1">ingredients_list </span><span class="s2">= [</span><span class="s1">ingredient</span><span class="s2">.</span><span class="s1">strip</span><span class="s2">() </span><span class="s0">for </span><span class="s1">ingredient </span><span class="s0">in </span><span class="s1">ingredients_text</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;,&quot;</span><span class="s2">)]</span>
+
+        <span class="s3"># Initialize a list to store processed ingredients</span>
+        <span class="s1">processed_ingredients </span><span class="s2">= []</span>
+
+        <span class="s0">for </span><span class="s1">ingredient </span><span class="s0">in </span><span class="s1">ingredients_list</span><span class="s2">:</span>
+            <span class="s3"># If the ingredient contains a slash (&quot;/&quot;), split it into separate strings</span>
+            <span class="s0">if </span><span class="s4">&quot;/&quot; </span><span class="s0">in </span><span class="s1">ingredient</span><span class="s2">:</span>
+                <span class="s1">split_ingredients </span><span class="s2">= </span><span class="s1">ingredient</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;/&quot;</span><span class="s2">)</span>
+                <span class="s1">processed_ingredients</span><span class="s2">.</span><span class="s1">extend</span><span class="s2">([</span><span class="s1">i</span><span class="s2">.</span><span class="s1">strip</span><span class="s2">() </span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">split_ingredients</span><span class="s2">])  </span><span class="s3"># No quotes around ingredients</span>
+            <span class="s0">else</span><span class="s2">:</span>
+                <span class="s1">processed_ingredients</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">ingredient</span><span class="s2">.</span><span class="s1">strip</span><span class="s2">())  </span><span class="s3"># No quotes around ingredient</span>
+
+        <span class="s3"># Append the processed ingredients to the global list</span>
+        <span class="s1">ingList</span><span class="s2">.</span><span class="s1">extend</span><span class="s2">(</span><span class="s1">processed_ingredients</span><span class="s2">)</span>
+
+        <span class="s3"># Remove duplicates by converting the list to a set and back to a list</span>
+        <span class="s1">ingList</span><span class="s2">[:] = </span><span class="s1">list</span><span class="s2">(</span><span class="s1">set</span><span class="s2">(</span><span class="s1">ingList</span><span class="s2">))</span>
+
+        <span class="s3"># Print the ingredients and the list</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Stored Ingredients:&quot;</span><span class="s2">, </span><span class="s4">&quot;, &quot;</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s1">processed_ingredients</span><span class="s2">))</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Ingredients List (No Duplicates):&quot;</span><span class="s2">, </span><span class="s1">ingList</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;No ingredients to store.&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Simulate going to the next page</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Going to Allergen Check Page...&quot;</span><span class="s2">)</span>
+
+<span class="s3">#########################################</span>
+<span class="s3"># 🖊️ Standardising the page setup: clear and add widgets, background, fill screen, bg image + resize 🖊️🖊️🖊️🖊️🖊️🖊️🖊️🖊️</span>
+<span class="s3">#########################################</span>
+<span class="s0">def </span><span class="s1">setup_page_with_background</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">image_path</span><span class="s2">, </span><span class="s1">widget_setup_function</span><span class="s2">=</span><span class="s0">None</span><span class="s2">):</span>
+    <span class="s5">&quot;&quot;&quot;Sets up a dynamically resized background PNG behind widgets for a given frame.&quot;&quot;&quot;</span>
+    <span class="s0">for </span><span class="s1">widget </span><span class="s0">in </span><span class="s1">frame</span><span class="s2">.</span><span class="s1">winfo_children</span><span class="s2">():</span>
+        <span class="s1">widget</span><span class="s2">.</span><span class="s1">destroy</span><span class="s2">()</span>
+
+    <span class="s3"># Create a canvas for the background</span>
+    <span class="s1">canvas </span><span class="s2">= </span><span class="s1">Canvas</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">width</span><span class="s2">=</span><span class="s1">frame</span><span class="s2">.</span><span class="s1">winfo_width</span><span class="s2">(), </span><span class="s1">height</span><span class="s2">=</span><span class="s1">frame</span><span class="s2">.</span><span class="s1">winfo_height</span><span class="s2">(), </span><span class="s1">highlightthickness</span><span class="s2">=</span><span class="s6">0</span><span class="s2">, </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;#c8f61b&quot;</span><span class="s2">)</span>
+    <span class="s1">canvas</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">fill</span><span class="s2">=</span><span class="s4">&quot;both&quot;</span><span class="s2">, </span><span class="s1">expand</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s3"># Load and resize the image</span>
+    <span class="s1">bg_img </span><span class="s2">= </span><span class="s1">Image</span><span class="s2">.</span><span class="s1">open</span><span class="s2">(</span><span class="s1">image_path</span><span class="s2">)</span>
+    <span class="s1">screen_width </span><span class="s2">= </span><span class="s1">frame</span><span class="s2">.</span><span class="s1">winfo_width</span><span class="s2">() </span><span class="s0">or </span><span class="s6">1920</span>
+    <span class="s1">screen_height </span><span class="s2">= </span><span class="s1">frame</span><span class="s2">.</span><span class="s1">winfo_height</span><span class="s2">() </span><span class="s0">or </span><span class="s6">1080</span>
+    <span class="s1">img_width</span><span class="s2">, </span><span class="s1">img_height </span><span class="s2">= </span><span class="s1">bg_img</span><span class="s2">.</span><span class="s1">size</span>
+    <span class="s1">aspect_ratio </span><span class="s2">= </span><span class="s1">img_width </span><span class="s2">/ </span><span class="s1">img_height</span>
+    <span class="s0">if </span><span class="s1">screen_width </span><span class="s2">/ </span><span class="s1">screen_height </span><span class="s2">&gt; </span><span class="s1">aspect_ratio</span><span class="s2">:</span>
+        <span class="s1">new_height </span><span class="s2">= </span><span class="s1">screen_height</span>
+        <span class="s1">new_width </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">new_height </span><span class="s2">* </span><span class="s1">aspect_ratio</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">new_width </span><span class="s2">= </span><span class="s1">screen_width</span>
+        <span class="s1">new_height </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">new_width </span><span class="s2">/ </span><span class="s1">aspect_ratio</span><span class="s2">)</span>
+    <span class="s1">bg_img </span><span class="s2">= </span><span class="s1">bg_img</span><span class="s2">.</span><span class="s1">resize</span><span class="s2">((</span><span class="s1">new_width</span><span class="s2">, </span><span class="s1">new_height</span><span class="s2">), </span><span class="s1">Image</span><span class="s2">.</span><span class="s1">Resampling</span><span class="s2">.</span><span class="s1">LANCZOS</span><span class="s2">)</span>
+    <span class="s1">bg_image </span><span class="s2">= </span><span class="s1">ImageTk</span><span class="s2">.</span><span class="s1">PhotoImage</span><span class="s2">(</span><span class="s1">bg_img</span><span class="s2">)</span>
+
+    <span class="s1">canvas</span><span class="s2">.</span><span class="s1">create_image</span><span class="s2">(</span><span class="s1">screen_width </span><span class="s2">// </span><span class="s6">2</span><span class="s2">, </span><span class="s1">screen_height </span><span class="s2">// </span><span class="s6">2</span><span class="s2">, </span><span class="s1">image</span><span class="s2">=</span><span class="s1">bg_image</span><span class="s2">)</span>
+    <span class="s1">canvas</span><span class="s2">.</span><span class="s1">image </span><span class="s2">= </span><span class="s1">bg_image  </span><span class="s3"># Prevent garbage collection</span>
+    <span class="s1">frame</span><span class="s2">.</span><span class="s1">canvas </span><span class="s2">= </span><span class="s1">canvas</span>
+
+    <span class="s3"># Add widgets on top of the canvas</span>
+    <span class="s0">if </span><span class="s1">widget_setup_function</span><span class="s2">:</span>
+        <span class="s1">widget_setup_function</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">)</span>
+
+    <span class="s0">return </span><span class="s1">canvas</span>
+
+<span class="s3">#########################################</span>
+<span class="s3"># 🐻 Setting up widgets for 5 pages : home, allergen check, clean, not clean, disclaimer 🐻🐻🐻🐻🐻🐻🐻🐻🐻🐻🐻🐻🐻</span>
+<span class="s3">#########################################</span>
+<span class="s3"># Home page</span>
+<span class="s0">def </span><span class="s1">setup_home_widgets</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">):</span>
+    <span class="s3"># Create the Text widget (textbox) inside the defined area and place it directly under the title</span>
+    <span class="s0">global </span><span class="s1">textbox  </span><span class="s3"># Use global to access `textbox` in other functions</span>
+    <span class="s1">textbox </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Text</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">wrap</span><span class="s2">=</span><span class="s4">&quot;word&quot;</span><span class="s2">, </span><span class="s1">height</span><span class="s2">=</span><span class="s6">11</span><span class="s2">, </span><span class="s1">width</span><span class="s2">=</span><span class="s6">60</span><span class="s2">)</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">20</span><span class="s2">)  </span><span class="s3"># Place textbox right under the title with padding</span>
+
+    <span class="s3"># Set the background and border to make it look like a rectangle</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">config</span><span class="s2">(</span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;#FFFFFF&quot;</span><span class="s2">, </span><span class="s1">bd</span><span class="s2">=</span><span class="s6">4</span><span class="s2">, </span><span class="s1">relief</span><span class="s2">=</span><span class="s4">&quot;solid&quot;</span><span class="s2">, </span><span class="s1">font</span><span class="s2">=(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s6">15</span><span class="s2">, </span><span class="s4">&quot;bold&quot;</span><span class="s2">), </span><span class="s1">fg</span><span class="s2">=</span><span class="s4">&quot;#2f2f2f&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Clear the text box each time we go back to the Home page (reset the content)</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end-1c&quot;</span><span class="s2">)  </span><span class="s3"># Clear any existing text</span>
+
+    <span class="s3"># Reset ingList to empty if you want to start fresh every time</span>
+    <span class="s0">global </span><span class="s1">ingList</span>
+    <span class="s1">ingList </span><span class="s2">= []</span>
+
+    <span class="s3"># Create the textbox with the placeholder text (if the textbox is empty)</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">insert</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;Paste ingredients here...🌼&quot;</span><span class="s2">)</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">tag_add</span><span class="s2">(</span><span class="s4">&quot;placeholder&quot;</span><span class="s2">, </span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end-1c&quot;</span><span class="s2">)</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">tag_configure</span><span class="s2">(</span><span class="s4">&quot;placeholder&quot;</span><span class="s2">, </span><span class="s1">foreground</span><span class="s2">=</span><span class="s4">&quot;#bbbbbb&quot;</span><span class="s2">, </span><span class="s1">font</span><span class="s2">=(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s6">17</span><span class="s2">, </span><span class="s4">&quot;bold&quot;</span><span class="s2">))</span>
+
+    <span class="s3"># Function to set and remove the placeholder text</span>
+    <span class="s0">def </span><span class="s1">on_focus_in</span><span class="s2">(</span><span class="s1">event</span><span class="s2">):</span>
+        <span class="s0">if </span><span class="s1">textbox</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end-1c&quot;</span><span class="s2">) == </span><span class="s4">&quot;Paste ingredients here...🌼&quot;</span><span class="s2">:</span>
+            <span class="s1">textbox</span><span class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end&quot;</span><span class="s2">)</span>
+
+    <span class="s0">def </span><span class="s1">on_focus_out</span><span class="s2">(</span><span class="s1">event</span><span class="s2">):</span>
+        <span class="s0">if </span><span class="s1">textbox</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end-1c&quot;</span><span class="s2">) == </span><span class="s4">&quot;&quot;</span><span class="s2">:</span>
+            <span class="s1">textbox</span><span class="s2">.</span><span class="s1">insert</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;Paste ingredients here...🌼&quot;</span><span class="s2">, </span><span class="s4">&quot;placeholder&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Bind the focus-in and focus-out events</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">bind</span><span class="s2">(</span><span class="s4">&quot;&lt;FocusIn&gt;&quot;</span><span class="s2">, </span><span class="s1">on_focus_in</span><span class="s2">)</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">bind</span><span class="s2">(</span><span class="s4">&quot;&lt;FocusOut&gt;&quot;</span><span class="s2">, </span><span class="s1">on_focus_out</span><span class="s2">)</span>
+
+    <span class="s3"># Add the NEXT button and link it to the function</span>
+    <span class="s1">next_button </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;NEXT&quot;</span><span class="s2">,</span>
+                            <span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: [</span><span class="s1">store_and_print_ingredients</span><span class="s2">(), </span><span class="s1">switch_to_allergencheck</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">)])</span>
+    <span class="s1">next_button</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">()  </span><span class="s3"># or use .grid()/.place() based on your layout</span>
+
+    <span class="s3"># Disable the NEXT button initially</span>
+    <span class="s1">next_button</span><span class="s2">.</span><span class="s1">config</span><span class="s2">(</span><span class="s1">state</span><span class="s2">=</span><span class="s1">tk</span><span class="s2">.</span><span class="s1">DISABLED</span><span class="s2">)</span>
+
+    <span class="s3"># Function to enable/disable the NEXT button based on the textbox content</span>
+    <span class="s0">def </span><span class="s1">check_ingredient_entry</span><span class="s2">(</span><span class="s1">event</span><span class="s2">=</span><span class="s0">None</span><span class="s2">):</span>
+        <span class="s1">ingredients_text </span><span class="s2">= </span><span class="s1">textbox</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s4">&quot;1.0&quot;</span><span class="s2">, </span><span class="s4">&quot;end-1c&quot;</span><span class="s2">).</span><span class="s1">strip</span><span class="s2">()</span>
+        <span class="s0">if </span><span class="s1">ingredients_text </span><span class="s2">!= </span><span class="s4">&quot;&quot; </span><span class="s0">and </span><span class="s1">ingredients_text </span><span class="s2">!= </span><span class="s4">&quot;Paste ingredients here...🌼&quot;</span><span class="s2">:</span>
+            <span class="s1">next_button</span><span class="s2">.</span><span class="s1">config</span><span class="s2">(</span><span class="s1">state</span><span class="s2">=</span><span class="s1">tk</span><span class="s2">.</span><span class="s1">NORMAL</span><span class="s2">)</span>
+        <span class="s0">else</span><span class="s2">:</span>
+            <span class="s1">next_button</span><span class="s2">.</span><span class="s1">config</span><span class="s2">(</span><span class="s1">state</span><span class="s2">=</span><span class="s1">tk</span><span class="s2">.</span><span class="s1">DISABLED</span><span class="s2">)</span>
+
+    <span class="s3"># Bind the event to check when the content changes</span>
+    <span class="s1">textbox</span><span class="s2">.</span><span class="s1">bind</span><span class="s2">(</span><span class="s4">&quot;&lt;KeyRelease&gt;&quot;</span><span class="s2">, </span><span class="s1">check_ingredient_entry</span><span class="s2">)</span>
+
+    <span class="s3"># DISCLAIMER Button</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🙆‍♀️️DISCLAIMER&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_disclaimer</span><span class="s2">(</span><span class="s1">Frame</span><span class="s2">)).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Navigating to Disclaimer page...&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># EXIT Button</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🚪Exit program&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s1">root</span><span class="s2">.</span><span class="s1">quit</span><span class="s2">).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+<span class="s3"># Allergen check page</span>
+<span class="s0">def </span><span class="s1">setup_allergencheck_widgets</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">):</span>
+    <span class="s3"># Add Go back a step button that preserves the ingredients</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🏠&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">)).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;Go back a step&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">)).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Create a frame to hold the checkboxes for allergen categories</span>
+    <span class="s1">allergen_frame </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Frame</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;white&quot;</span><span class="s2">)</span>
+    <span class="s1">allergen_frame</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Function to update selected allergens based on checkbox selections</span>
+    <span class="s0">def </span><span class="s1">update_selected</span><span class="s2">(</span><span class="s1">category</span><span class="s2">, </span><span class="s1">var</span><span class="s2">):</span>
+        <span class="s1">selectedallergens</span><span class="s2">[</span><span class="s1">category</span><span class="s2">] = </span><span class="s1">var</span><span class="s2">.</span><span class="s1">get</span><span class="s2">()</span>
+
+    <span class="s3"># Loop through allergen categories to create checkboxes dynamically</span>
+    <span class="s0">for </span><span class="s1">category </span><span class="s0">in </span><span class="s1">allergen_categories</span><span class="s2">:</span>
+        <span class="s1">var </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">BooleanVar</span><span class="s2">(</span><span class="s1">value</span><span class="s2">=</span><span class="s1">selectedallergens</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">category</span><span class="s2">, </span><span class="s0">False</span><span class="s2">))  </span><span class="s3"># Get current state</span>
+        <span class="s1">checkbox </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Checkbutton</span><span class="s2">(</span><span class="s1">allergen_frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s1">category</span><span class="s2">, </span><span class="s1">font</span><span class="s2">=(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s6">15</span><span class="s2">), </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;white&quot;</span><span class="s2">, </span><span class="s1">variable</span><span class="s2">=</span><span class="s1">var</span><span class="s2">,</span>
+                                  <span class="s1">command</span><span class="s2">=</span><span class="s0">lambda </span><span class="s1">category</span><span class="s2">=</span><span class="s1">category</span><span class="s2">, </span><span class="s1">var</span><span class="s2">=</span><span class="s1">var</span><span class="s2">: </span><span class="s1">update_selected</span><span class="s2">(</span><span class="s1">category</span><span class="s2">, </span><span class="s1">var</span><span class="s2">))</span>
+        <span class="s1">checkbox</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">anchor</span><span class="s2">=</span><span class="s4">&quot;w&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Add checkbox for Custom allergens</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Label</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;Add Custom Allergens&quot;</span><span class="s2">, </span><span class="s1">font</span><span class="s2">=(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s6">16</span><span class="s2">), </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;white&quot;</span><span class="s2">).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+    <span class="s1">custom_allergen_text </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Entry</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">font</span><span class="s2">=(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s6">15</span><span class="s2">), </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;white&quot;</span><span class="s2">, </span><span class="s1">width</span><span class="s2">=</span><span class="s6">30</span><span class="s2">, </span><span class="s1">relief</span><span class="s2">=</span><span class="s4">&quot;solid&quot;</span><span class="s2">,</span>
+                                    <span class="s1">bd</span><span class="s2">=</span><span class="s6">2</span><span class="s2">)  </span><span class="s3"># Outline added</span>
+    <span class="s1">custom_allergen_text</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Variable to track the allergen being edited</span>
+    <span class="s1">selected_allergen_to_edit </span><span class="s2">= </span><span class="s0">None</span>
+
+    <span class="s3"># Function to toggle between adding a new allergen and saving an edit</span>
+    <span class="s0">def </span><span class="s1">save_or_edit_allergen</span><span class="s2">():</span>
+        <span class="s0">nonlocal </span><span class="s1">selected_allergen_to_edit</span>
+        <span class="s1">custom_allergen </span><span class="s2">= </span><span class="s1">custom_allergen_text</span><span class="s2">.</span><span class="s1">get</span><span class="s2">().</span><span class="s1">strip</span><span class="s2">()</span>
+        <span class="s0">if not </span><span class="s1">custom_allergen</span><span class="s2">:</span>
+            <span class="s0">return  </span><span class="s3"># Do nothing if the input field is empty</span>
+
+        <span class="s0">if </span><span class="s1">selected_allergen_to_edit</span><span class="s2">:  </span><span class="s3"># Editing an existing allergen</span>
+            <span class="s1">index </span><span class="s2">= </span><span class="s1">custom_allergens</span><span class="s2">.</span><span class="s1">index</span><span class="s2">(</span><span class="s1">selected_allergen_to_edit</span><span class="s2">)</span>
+            <span class="s1">custom_allergens</span><span class="s2">[</span><span class="s1">index</span><span class="s2">] = </span><span class="s1">custom_allergen</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;Custom allergen edited: </span><span class="s0">{</span><span class="s1">selected_allergen_to_edit</span><span class="s0">} </span><span class="s4">-&gt; </span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+            <span class="s1">selected_allergen_to_edit </span><span class="s2">= </span><span class="s0">None  </span><span class="s3"># Clear edit state</span>
+        <span class="s0">else</span><span class="s2">:  </span><span class="s3"># Adding a new allergen</span>
+            <span class="s1">allergens </span><span class="s2">= [</span><span class="s1">a</span><span class="s2">.</span><span class="s1">strip</span><span class="s2">() </span><span class="s0">for </span><span class="s1">a </span><span class="s0">in </span><span class="s1">custom_allergen</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;,&quot;</span><span class="s2">)]</span>
+            <span class="s0">for </span><span class="s1">allergen </span><span class="s0">in </span><span class="s1">allergens</span><span class="s2">:</span>
+                <span class="s0">if </span><span class="s1">allergen </span><span class="s0">not in </span><span class="s1">custom_allergens</span><span class="s2">:</span>
+                    <span class="s1">custom_allergens</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">allergen</span><span class="s2">)</span>
+                    <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;Custom allergen added: </span><span class="s0">{</span><span class="s1">allergen</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+
+        <span class="s1">update_allergen_list</span><span class="s2">()</span>
+        <span class="s1">custom_allergen_text</span><span class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s6">0</span><span class="s2">, </span><span class="s4">&quot;end&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Save/Edit button</span>
+    <span class="s1">save_edit_button </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;➕ Save/Edit&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s1">save_or_edit_allergen</span><span class="s2">)</span>
+    <span class="s1">save_edit_button</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Create a frame for the list of custom allergens with buttons to delete or edit</span>
+    <span class="s1">custom_list_frame </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Frame</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;white&quot;</span><span class="s2">)</span>
+    <span class="s1">custom_list_frame</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Listbox to display custom allergens</span>
+    <span class="s1">allergen_listbox </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Listbox</span><span class="s2">(</span><span class="s1">custom_list_frame</span><span class="s2">, </span><span class="s1">height</span><span class="s2">=</span><span class="s6">6</span><span class="s2">, </span><span class="s1">width</span><span class="s2">=</span><span class="s6">40</span><span class="s2">, </span><span class="s1">font</span><span class="s2">=(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s6">15</span><span class="s2">))</span>
+    <span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">side</span><span class="s2">=</span><span class="s4">&quot;left&quot;</span><span class="s2">, </span><span class="s1">fill</span><span class="s2">=</span><span class="s4">&quot;y&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Scrollbar for the listbox</span>
+    <span class="s1">scrollbar </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Scrollbar</span><span class="s2">(</span><span class="s1">custom_list_frame</span><span class="s2">, </span><span class="s1">orient</span><span class="s2">=</span><span class="s4">&quot;vertical&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">yview</span><span class="s2">)</span>
+    <span class="s1">scrollbar</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">side</span><span class="s2">=</span><span class="s4">&quot;right&quot;</span><span class="s2">, </span><span class="s1">fill</span><span class="s2">=</span><span class="s4">&quot;y&quot;</span><span class="s2">)</span>
+    <span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">config</span><span class="s2">(</span><span class="s1">yscrollcommand</span><span class="s2">=</span><span class="s1">scrollbar</span><span class="s2">.</span><span class="s1">set</span><span class="s2">)</span>
+
+    <span class="s3"># Function to update the allergen list in the listbox</span>
+    <span class="s0">def </span><span class="s1">update_allergen_list</span><span class="s2">():</span>
+        <span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s6">0</span><span class="s2">, </span><span class="s4">&quot;end&quot;</span><span class="s2">)  </span><span class="s3"># Clear the listbox</span>
+        <span class="s0">for </span><span class="s1">allergen </span><span class="s0">in </span><span class="s1">custom_allergens</span><span class="s2">:</span>
+            <span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">insert</span><span class="s2">(</span><span class="s4">&quot;end&quot;</span><span class="s2">, </span><span class="s1">allergen</span><span class="s2">)</span>
+
+    <span class="s3"># Function to delete selected allergen</span>
+    <span class="s0">def </span><span class="s1">delete_selected_allergen</span><span class="s2">():</span>
+        <span class="s0">try</span><span class="s2">:</span>
+            <span class="s1">selected </span><span class="s2">= </span><span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">curselection</span><span class="s2">()</span>
+            <span class="s0">if </span><span class="s1">selected</span><span class="s2">:</span>
+                <span class="s1">allergen_to_delete </span><span class="s2">= </span><span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">selected</span><span class="s2">)</span>
+                <span class="s1">custom_allergens</span><span class="s2">.</span><span class="s1">remove</span><span class="s2">(</span><span class="s1">allergen_to_delete</span><span class="s2">)</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;Custom allergen deleted: </span><span class="s0">{</span><span class="s1">allergen_to_delete</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+                <span class="s1">update_allergen_list</span><span class="s2">()</span>
+        <span class="s0">except </span><span class="s1">Exception </span><span class="s0">as </span><span class="s1">e</span><span class="s2">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Error deleting allergen:&quot;</span><span class="s2">, </span><span class="s1">e</span><span class="s2">)</span>
+
+    <span class="s3"># Delete Custom Allergen button</span>
+    <span class="s1">delete_button </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;❌ Delete Selected Custom Allergen&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s1">delete_selected_allergen</span><span class="s2">)</span>
+    <span class="s1">delete_button</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Reset custom allergens to empty list</span>
+    <span class="s0">def </span><span class="s1">reset_custom_allergens</span><span class="s2">():</span>
+        <span class="s1">custom_allergens</span><span class="s2">.</span><span class="s1">clear</span><span class="s2">()</span>
+        <span class="s1">update_allergen_list</span><span class="s2">()</span>
+        <span class="s1">custom_allergen_text</span><span class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s6">0</span><span class="s2">, </span><span class="s4">&quot;end&quot;</span><span class="s2">)</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;All custom allergens have been reset.&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Reset button</span>
+    <span class="s1">reset_button </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🔄 Reset All Custom Allergens&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s1">reset_custom_allergens</span><span class="s2">)</span>
+    <span class="s1">reset_button</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Add an Analyse button that will display the results</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;Analyse&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">perform_allergen_check</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">)).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+    <span class="s3"># Add double-click event to edit allergen</span>
+    <span class="s0">def </span><span class="s1">on_double_click</span><span class="s2">(</span><span class="s1">event</span><span class="s2">):</span>
+        <span class="s0">nonlocal </span><span class="s1">selected_allergen_to_edit</span>
+        <span class="s1">selected </span><span class="s2">= </span><span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">curselection</span><span class="s2">()</span>
+        <span class="s0">if </span><span class="s1">selected</span><span class="s2">:</span>
+            <span class="s1">allergen_to_edit </span><span class="s2">= </span><span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">selected</span><span class="s2">)</span>
+            <span class="s1">custom_allergen_text</span><span class="s2">.</span><span class="s1">delete</span><span class="s2">(</span><span class="s6">0</span><span class="s2">, </span><span class="s4">&quot;end&quot;</span><span class="s2">)</span>
+            <span class="s1">custom_allergen_text</span><span class="s2">.</span><span class="s1">insert</span><span class="s2">(</span><span class="s6">0</span><span class="s2">, </span><span class="s1">allergen_to_edit</span><span class="s2">)</span>
+            <span class="s1">selected_allergen_to_edit </span><span class="s2">= </span><span class="s1">allergen_to_edit</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;Editing allergen: </span><span class="s0">{</span><span class="s1">allergen_to_edit</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+
+    <span class="s1">allergen_listbox</span><span class="s2">.</span><span class="s1">bind</span><span class="s2">(</span><span class="s4">&quot;&lt;Double-1&gt;&quot;</span><span class="s2">, </span><span class="s1">on_double_click</span><span class="s2">)</span>
+
+    <span class="s3"># Update the allergen list initially</span>
+    <span class="s1">update_allergen_list</span><span class="s2">()</span>
+
+<span class="s3"># Slight detour: Establishing &quot;perform_allergen_check&quot; function: Compares ingredients vs allergens &amp; displays matches or no matches.</span>
+<span class="s0">def </span><span class="s1">perform_allergen_check</span><span class="s2">():</span>
+    <span class="s5">&quot;&quot;&quot;Perform allergen check and show results.&quot;&quot;&quot;</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Performing allergen check...&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># List to store detected allergens</span>
+    <span class="s1">found_allergens </span><span class="s2">= []</span>
+
+    <span class="s3"># Printing selected categories and custom allergens for tracking</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Selected allergen categories:&quot;</span><span class="s2">)</span>
+    <span class="s0">for </span><span class="s1">category</span><span class="s2">, </span><span class="s1">selected </span><span class="s0">in </span><span class="s1">selectedallergens</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+        <span class="s0">if </span><span class="s1">selected</span><span class="s2">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;- </span><span class="s0">{</span><span class="s1">category</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;</span><span class="s0">\n</span><span class="s4">Custom allergens to check:&quot;</span><span class="s2">)</span>
+    <span class="s0">for </span><span class="s1">custom_allergen </span><span class="s0">in </span><span class="s1">custom_allergens</span><span class="s2">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;- </span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Check for allergens in predefined categories</span>
+    <span class="s0">for </span><span class="s1">ingredient </span><span class="s0">in </span><span class="s1">ingList</span><span class="s2">:</span>
+        <span class="s0">for </span><span class="s1">category</span><span class="s2">, </span><span class="s1">allergens </span><span class="s0">in </span><span class="s1">allergen_categories</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+            <span class="s0">if </span><span class="s1">selectedallergens</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">category</span><span class="s2">, </span><span class="s0">False</span><span class="s2">):  </span><span class="s3"># Only check selected categories</span>
+                <span class="s0">for </span><span class="s1">allergen </span><span class="s0">in </span><span class="s1">allergens</span><span class="s2">:</span>
+                    <span class="s1">match_percentage </span><span class="s2">= </span><span class="s1">fuzz</span><span class="s2">.</span><span class="s1">partial_ratio</span><span class="s2">(</span><span class="s1">ingredient</span><span class="s2">.</span><span class="s1">lower</span><span class="s2">(), </span><span class="s1">allergen</span><span class="s2">.</span><span class="s1">lower</span><span class="s2">())</span>
+
+                    <span class="s0">if </span><span class="s1">match_percentage </span><span class="s2">&gt;= </span><span class="s6">90</span><span class="s2">:</span>
+                        <span class="s1">found_allergens</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s4">f&quot;Certain match: </span><span class="s0">{</span><span class="s1">allergen</span><span class="s0">} </span><span class="s4">(97%+)&quot;</span><span class="s2">)</span>
+                        <span class="s1">print</span><span class="s2">(</span>
+                            <span class="s4">f&quot;Ingredient '</span><span class="s0">{</span><span class="s1">ingredient</span><span class="s0">}</span><span class="s4">' contains allergen '</span><span class="s0">{</span><span class="s1">allergen</span><span class="s0">}</span><span class="s4">' with a certain match (</span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%)&quot;</span>
+                        <span class="s2">)</span>
+                    <span class="s0">elif </span><span class="s6">80 </span><span class="s2">&lt;= </span><span class="s1">match_percentage </span><span class="s2">&lt; </span><span class="s6">90</span><span class="s2">:</span>
+                        <span class="s1">found_allergens</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s4">f&quot;Unsure match: </span><span class="s0">{</span><span class="s1">allergen</span><span class="s0">} </span><span class="s4">(</span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%)&quot;</span><span class="s2">)</span>
+                        <span class="s1">print</span><span class="s2">(</span>
+                            <span class="s4">f&quot;Ingredient '</span><span class="s0">{</span><span class="s1">ingredient</span><span class="s0">}</span><span class="s4">' contains allergen '</span><span class="s0">{</span><span class="s1">allergen</span><span class="s0">}</span><span class="s4">' with an unsure match (</span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%)&quot;</span>
+                        <span class="s2">)</span>
+
+    <span class="s3"># Check for allergens in custom allergens</span>
+    <span class="s0">for </span><span class="s1">custom_allergen </span><span class="s0">in </span><span class="s1">custom_allergens</span><span class="s2">:</span>
+        <span class="s0">for </span><span class="s1">ingredient </span><span class="s0">in </span><span class="s1">ingList</span><span class="s2">:</span>
+            <span class="s1">match_percentage </span><span class="s2">= </span><span class="s1">fuzz</span><span class="s2">.</span><span class="s1">partial_ratio</span><span class="s2">(</span><span class="s1">ingredient</span><span class="s2">.</span><span class="s1">lower</span><span class="s2">(), </span><span class="s1">custom_allergen</span><span class="s2">.</span><span class="s1">lower</span><span class="s2">())</span>
+
+            <span class="s3"># Debugging line to track custom allergen matching</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f&quot;Checking: '</span><span class="s0">{</span><span class="s1">ingredient</span><span class="s0">}</span><span class="s4">' vs '</span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">}</span><span class="s4">' -&gt; </span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%&quot;</span><span class="s2">)  </span><span class="s3"># Debug line</span>
+
+            <span class="s0">if </span><span class="s1">match_percentage </span><span class="s2">&gt;= </span><span class="s6">90</span><span class="s2">:</span>
+                <span class="s1">found_allergens</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s4">f&quot;Certain match: </span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">} </span><span class="s4">(97%+)&quot;</span><span class="s2">)</span>
+                <span class="s1">print</span><span class="s2">(</span>
+                    <span class="s4">f&quot;Ingredient '</span><span class="s0">{</span><span class="s1">ingredient</span><span class="s0">}</span><span class="s4">' contains custom allergen '</span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">}</span><span class="s4">' with a certain match (</span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%)&quot;</span>
+                <span class="s2">)</span>
+            <span class="s0">elif </span><span class="s6">80 </span><span class="s2">&lt;= </span><span class="s1">match_percentage </span><span class="s2">&lt; </span><span class="s6">90</span><span class="s2">:</span>
+                <span class="s1">found_allergens</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s4">f&quot;Unsure match: </span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">} </span><span class="s4">(</span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%)&quot;</span><span class="s2">)</span>
+                <span class="s1">print</span><span class="s2">(</span>
+                    <span class="s4">f&quot;Ingredient '</span><span class="s0">{</span><span class="s1">ingredient</span><span class="s0">}</span><span class="s4">' contains custom allergen '</span><span class="s0">{</span><span class="s1">custom_allergen</span><span class="s0">}</span><span class="s4">' with an unsure match (</span><span class="s0">{</span><span class="s1">match_percentage</span><span class="s0">}</span><span class="s4">%)&quot;</span>
+                <span class="s2">)</span>
+
+    <span class="s3"># Displaying results and navigating to the appropriate page</span>
+    <span class="s0">if </span><span class="s1">found_allergens</span><span class="s2">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;</span><span class="s0">\n</span><span class="s4">Allergens detected:&quot;</span><span class="s2">, </span><span class="s4">&quot;, &quot;</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s1">found_allergens</span><span class="s2">))</span>
+        <span class="s1">switch_to_notclean</span><span class="s2">(</span><span class="s1">found_allergens</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s2">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;No allergens detected.&quot;</span><span class="s2">)</span>
+        <span class="s1">switch_to_clean</span><span class="s2">()</span>
+
+
+<span class="s3"># Slight detour: Establishing &quot;clean_string&quot; function to clean inputted list, removing non-alphabetic characters and extra spaces (e.g. &quot;Amyl cinnamal, 98%&quot; = &quot;Amyl cinnamal&quot;).</span>
+<span class="s0">def </span><span class="s1">clean_string</span><span class="s2">(</span><span class="s1">input_string</span><span class="s2">):</span>
+    <span class="s5">&quot;&quot;&quot;Clean up the ingredient and allergen strings by removing non-alphabetic characters and extra spaces&quot;&quot;&quot;</span>
+    <span class="s3"># Remove non-alphabetic characters (except spaces) and lower the case</span>
+    <span class="s1">cleaned </span><span class="s2">= </span><span class="s1">re</span><span class="s2">.</span><span class="s1">sub</span><span class="s2">(</span><span class="s4">r'[^a-zA-Z\s]'</span><span class="s2">, </span><span class="s4">''</span><span class="s2">, </span><span class="s1">input_string</span><span class="s2">)</span>
+    <span class="s3"># Remove extra spaces</span>
+    <span class="s1">cleaned </span><span class="s2">= </span><span class="s1">re</span><span class="s2">.</span><span class="s1">sub</span><span class="s2">(</span><span class="s4">r'\s+'</span><span class="s2">, </span><span class="s4">' '</span><span class="s2">, </span><span class="s1">cleaned</span><span class="s2">).</span><span class="s1">strip</span><span class="s2">()</span>
+    <span class="s0">return </span><span class="s1">cleaned</span>
+
+<span class="s3"># Clean page</span>
+<span class="s0">def </span><span class="s1">setup_clean_widgets</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">):</span>
+    <span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">.</span><span class="s1">canvas</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🏠&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">()).</span><span class="s1">place</span><span class="s2">(</span><span class="s1">x</span><span class="s2">=</span><span class="s6">850</span><span class="s2">, </span><span class="s1">y</span><span class="s2">=</span><span class="s6">500</span><span class="s2">)</span>
+    <span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">.</span><span class="s1">canvas</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;Do another&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">()).</span><span class="s1">place</span><span class="s2">(</span><span class="s1">x</span><span class="s2">=</span><span class="s6">850</span><span class="s2">, </span><span class="s1">y</span><span class="s2">=</span><span class="s6">550</span><span class="s2">)</span>
+
+<span class="s3"># Not clean page</span>
+<span class="s0">def </span><span class="s1">setup_notclean_widgets</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">):</span>
+    <span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">.</span><span class="s1">canvas</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🏠&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">()).</span><span class="s1">place</span><span class="s2">(</span><span class="s1">x</span><span class="s2">=</span><span class="s6">850</span><span class="s2">, </span><span class="s1">y</span><span class="s2">=</span><span class="s6">500</span><span class="s2">)</span>
+    <span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">.</span><span class="s1">canvas</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;Do another&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">()).</span><span class="s1">place</span><span class="s2">(</span><span class="s1">x</span><span class="s2">=</span><span class="s6">850</span><span class="s2">, </span><span class="s1">y</span><span class="s2">=</span><span class="s6">550</span><span class="s2">)</span>
+
+<span class="s3"># Disclaimer page</span>
+<span class="s0">def </span><span class="s1">setup_disclaimer_widgets</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">):</span>
+    <span class="s3"># Buttons to go back to home</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;🏠&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">)).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+    <span class="s1">tk</span><span class="s2">.</span><span class="s1">Button</span><span class="s2">(</span><span class="s1">frame</span><span class="s2">, </span><span class="s1">text</span><span class="s2">=</span><span class="s4">&quot;GO BACK HOME&quot;</span><span class="s2">, </span><span class="s1">command</span><span class="s2">=</span><span class="s0">lambda</span><span class="s2">: </span><span class="s1">switch_to_home</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">)).</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">pady</span><span class="s2">=</span><span class="s6">10</span><span class="s2">)</span>
+
+<span class="s3">#########################################</span>
+<span class="s3"># 🔮 Combining '.png' + widget switch for each page: home, allergen check, clean, not clean, disclaimer 🔮🔮🔮🔮🔮🔮🔮</span>
+<span class="s3">#########################################</span>
+<span class="s0">def </span><span class="s1">switch_to_home</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">frame</span><span class="s2">):</span>
+    <span class="s5">&quot;&quot;&quot;Switch to the home page.&quot;&quot;&quot;</span>
+    <span class="s1">switch_to_page</span><span class="s2">(</span><span class="s1">main_frame</span><span class="s2">, </span><span class="s4">&quot;home.png&quot;</span><span class="s2">, </span><span class="s1">setup_home_widgets</span><span class="s2">)</span>
+
+
+<span class="s3"># Navigation functions</span>
+<span class="s0">def </span><span class="s1">switch_to_home</span><span class="s2">():</span>
+    <span class="s1">setup_page_with_background</span><span class="s2">(</span><span class="s1">main_frame</span><span class="s2">, </span><span class="s4">&quot;home.png&quot;</span><span class="s2">, </span><span class="s1">setup_home_widgets</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">switch_to_allergencheck</span><span class="s2">():</span>
+    <span class="s1">setup_page_with_background</span><span class="s2">(</span><span class="s1">main_frame</span><span class="s2">, </span><span class="s4">&quot;allergencheck.png&quot;</span><span class="s2">, </span><span class="s1">setup_allergencheck_widgets</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">switch_to_clean</span><span class="s2">():</span>
+    <span class="s1">setup_page_with_background</span><span class="s2">(</span><span class="s1">main_frame</span><span class="s2">, </span><span class="s4">&quot;clean.png&quot;</span><span class="s2">, </span><span class="s1">setup_clean_widgets</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">switch_to_notclean</span><span class="s2">():</span>
+    <span class="s1">setup_page_with_background</span><span class="s2">(</span><span class="s1">main_frame</span><span class="s2">, </span><span class="s4">&quot;notclean.png&quot;</span><span class="s2">, </span><span class="s1">setup_notclean_widgets</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">switch_to_disclaimer</span><span class="s2">():</span>
+    <span class="s1">frame</span><span class="s2">.</span><span class="s1">destroy</span><span class="s2">()</span>
+    <span class="s1">setup_page_with_background</span><span class="s2">(</span><span class="s1">main_frame</span><span class="s2">, </span><span class="s4">&quot;disclaimer.png&quot;</span><span class="s2">, </span><span class="s1">setup_disclaimer_widgets</span><span class="s2">)</span>
+
+
+<span class="s3">#########################################</span>
+<span class="s3"># 🌺 Main application setup: root, fullscreen, title, frame, starting on home page, looping 🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺🌺</span>
+<span class="s3">#########################################</span>
+<span class="s0">if </span><span class="s1">__name__ </span><span class="s2">== </span><span class="s4">&quot;__main__&quot;</span><span class="s2">:</span>
+    <span class="s1">root </span><span class="s2">= </span><span class="s1">Tk</span><span class="s2">()</span>
+    <span class="s1">root</span><span class="s2">.</span><span class="s1">attributes</span><span class="s2">(</span><span class="s4">'-fullscreen'</span><span class="s2">, </span><span class="s0">True</span><span class="s2">)  </span><span class="s3"># Fullscreen mode</span>
+    <span class="s1">root</span><span class="s2">.</span><span class="s1">title</span><span class="s2">(</span><span class="s4">&quot;𓍢ִ໋🌷͙֒Pretty Clean Ingredientsִ໋🌷͙ᩚ&quot;</span><span class="s2">)</span>
+
+    <span class="s1">main_frame </span><span class="s2">= </span><span class="s1">tk</span><span class="s2">.</span><span class="s1">Frame</span><span class="s2">(</span><span class="s1">root</span><span class="s2">, </span><span class="s1">bg</span><span class="s2">=</span><span class="s4">&quot;white&quot;</span><span class="s2">)</span>
+    <span class="s1">main_frame</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">fill</span><span class="s2">=</span><span class="s4">&quot;both&quot;</span><span class="s2">, </span><span class="s1">expand</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s1">main_frame </span><span class="s2">= </span><span class="s1">Frame</span><span class="s2">(</span><span class="s1">root</span><span class="s2">)</span>
+    <span class="s1">main_frame</span><span class="s2">.</span><span class="s1">pack</span><span class="s2">(</span><span class="s1">fill</span><span class="s2">=</span><span class="s4">&quot;both&quot;</span><span class="s2">, </span><span class="s1">expand</span><span class="s2">=</span><span class="s0">True</span><span class="s2">)</span>
+
+    <span class="s3"># Start with the home page</span>
+    <span class="s1">root</span><span class="s2">.</span><span class="s1">after</span><span class="s2">(</span><span class="s6">1</span><span class="s2">, </span><span class="s1">switch_to_home</span><span class="s2">)</span>
+
+    <span class="s1">root</span><span class="s2">.</span><span class="s1">mainloop</span><span class="s2">()</span>
+</pre>
+</body>
+</html>
