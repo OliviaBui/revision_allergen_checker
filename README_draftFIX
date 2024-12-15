@@ -1,0 +1,169 @@
+# Project Name: Pretty Clean Ingredients (PCI)
+
+**Live Demo**: [Insert Link Here] 🌼
+
+## Table of Contents
+1. [General Info](#general-info)
+2. [Technologies Used](#technologies-used)
+3. [Features](#features)
+4. [Screenshots](#screenshots)
+5. [Setup](#setup)
+6. [Usage](#usage)
+7. [Project Status](#project-status)
+8. [Room for Improvement](#room-for-improvement)
+9. [Acknowledgements](#acknowledgements)
+10. [Contact](#contact)
+
+## General Info
+Pretty Clean Ingredients (PCI) is a Python-based application designed to detect allergens in cosmetic products. It matches ingredients against the FDA's 5-class common allergens list and allows users to input custom allergens. The detection is based on a similarity threshold: 90% or above for a high certainty match, and 80-90% for a semi-certain match to account for misspellings and regional spelling differences (e.g., American vs. Australian English).
+
+### What Problem Does It Solve?
+This project was developed out of a personal interest in beauty care, especially to detect allergens that have caused adverse effects in the past, such as contact dermatitis and eczema.
+
+### Purpose of the Project
+The project was initially developed as a learning experience in Python and to fulfill an assignment requirement for the "Working with Data and Code" unit at UTS (University of Technology Sydney) in 2024 under the guidance of Evangeline Aguas.
+
+### Why Python Was Chosen
+Python was selected because of its simplicity and accessibility, making it a great choice for beginners. It allows for quick development and easy integration of external libraries, making it ideal for this project. The libraries used include:
+- **Tkinter**: For building the GUI (Graphical User Interface).
+- **FuzzyWuzzy**: For string matching to identify potential allergen matches, even with misspellings or regional variations.
+- **python-Levenshtein**: To enhance the speed of FuzzyWuzzy’s string comparison.
+- **Pillow (PIL)**: For image processing in Tkinter.
+- **Requests**: Used for handling HTTP requests, though further clarification is needed on its role in this project.
+
+### Alternative Applications
+- **Free of by Isabella**: A food allergen detector, whereas PCI detects allergens in cosmetics.
+- **INKI Decoder**: A web-based alternative, while PCI is designed to run locally.
+
+## Technologies Used
+- **Python** (Version 2024.3.1)
+- **PyCharm** (Version 2024.2.4, Professional Edition, using educational login)
+
+## Features
+- **Ingredient Allergen Checker**: Automatically checks ingredients for potential allergens from selected categories (e.g., fragrances, preservatives, metals).
+- **Custom Allergen Input**: Users can input their own allergens for checking.
+- **Fuzzy Matching**: Uses fuzzy string matching to account for variations in spelling.
+- **Duplicate Removal**: Removes duplicate ingredients and allergens from the list.
+- **User-Friendly Interface**: Simple, intuitive GUI using Tkinter.
+- **Error Handling**: Alerts for missing ingredients or invalid inputs.
+- **Customizable Allergen Categories**: Users can select allergen categories based on their needs.
+- **Ingredient Processing**: Supports multiple ingredient formats for allergen checking.
+- **Result Display**: Displays allergen matches with confidence levels.
+
+## Screenshots 🌼
+*Insert relevant screenshots here, showcasing the GUI and results of allergen detection.*
+
+## Setup
+
+### Required Libraries and Packages
+- **Tkinter**: For building the GUI.
+- **FuzzyWuzzy**: For string matching.
+- **Requests**: For making HTTP requests (if applicable).
+- **Pillow**: For image processing.
+
+These dependencies are listed in the `requirements.txt` file located in the root directory of the project.
+
+### Installation and Setup
+1. **Clone the Repository**:
+    ```bash
+    git clone https://github.com/yourusername/PrettyCleanIngredients.git
+    ```
+
+2. **Create a Virtual Environment**:
+    ```bash
+    cd PrettyCleanIngredients
+    python -m venv venv
+    ```
+
+3. **Activate the Virtual Environment**:
+   - For **Windows**:
+     ```bash
+     venv\Scripts\activate
+     ```
+   - For **macOS/Linux**:
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. **Install Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+5. **Run the Project**:
+    ```bash
+    python PrettyCleanIngredients.py
+    ```
+
+### Troubleshooting
+If you encounter any issues during setup, refer to the [Troubleshooting Section] or open an issue in the repository.
+
+## Usage
+
+1. **Clone the repository** (if you haven't already):
+    ```bash
+    git clone https://github.com/your-username/PrettyCleanIngredients.git
+    ```
+
+2. **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. **Run the Program**:
+    ```bash
+    python PrettyCleanIngredients.py
+    ```
+
+4. **Add Ingredients**:
+   - Paste a list of ingredients into the input box.
+   - Click **Add** to check for allergens.
+
+5. **Add/Edit Custom Ingredients**:
+   - Add custom ingredients by typing them into the input box and clicking **Add**.
+   - Edit ingredients by double-clicking the list or using the **Edit** button.
+
+6. **View Results**:
+   - The program will display the detected allergens with confidence percentages.
+
+### Example Usage
+- **Input**: Paste a list of ingredients (e.g., from a product label).
+    ```txt
+    Water/aqua/eau, glycerin, coconut alkanes, niacinamide, retinol, jojoba oil, etc.
+    ```
+
+- **Output**: The program will highlight any allergens detected in the input list.
+
+### Example Code Snippet:
+```python
+from tkinter import Tk
+from allergen_detector import AllergenChecker
+
+root = Tk()
+checker = AllergenChecker(root)
+root.mainloop()
+
+  ## Project Status
+This project is complete and was submitted as part of a university assignment.
+
+## Room for Improvement
+- **Button Functionality**: Fix the "Go back" button behavior.
+- **Audio and Haptic Feedback**: Add sound effects and haptic feedback for better accessibility.
+- **API Integration**: Add barcode scanning and alternative product suggestions.
+- **UI Enhancements**: Improve home button aesthetics, add animations, and enable page resizing.
+- **Better Ingredient Notifications**: Handle non-ingredient entries and notify users.
+
+## Key Challenges Overcome:
+- **Button and Ingredient Management**: Successfully implemented editing and duplicate removal.
+- **Fuzzy Matching**: Fine-tuned match percentages and string comparison logic.
+- **UI & Backend Improvements**: Enhanced functionality for custom ingredients and ingredient processing.
+
+## Acknowledgements
+- This project was inspired by the [freeOf application by Isabella Fons](https://github.com/isabellafons/freeOf), which focuses on detecting food allergens.
+- README template based on **Rita Lyczywek's README cheatsheet**.🌼
+- Ky Staal (UTS IT graduate and friend) for guidance.
+- Andre and Emily (Spring 2024 "Working with Data and Code" class) for peer feedback.
+- Evangeline Aguas and Andrew Stapleton for granting an extension to complete the work.
+
+## Contact
+For any questions or issues, feel free to contact me at [olivia.u.bui@student.uts.edu.au](mailto:olivia.u.bui@student.uts.edu.au) or open an issue in the repository.
