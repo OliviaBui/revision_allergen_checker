@@ -37,9 +37,11 @@ Main focus: running `.png` background files & correcting widget placement.
 Files: 
 1. working_base.py: The core functional application (to be submitted as a fallback if needed).
 2. working_fullscreen.py: Code for dynamic full-screen background image fitting, demonstrating the ability to create dynamic backgrounds with widgets layered on top.
-3. attempted_combination.py: A file attempting to combine the core functionality from (1) with the aesthetics of (2). Currently unsuccessful, but this will become the final file if integration succeeds.
-4. page.png series (e.g., home.png, disclaimer.png): Blank versions of the background images.
-5. full_images folder: Contains the complete versions of the background images, envisioning widget aesthetics and placements.
+3. combination_CHATGPT_template.py: A successfully working template integrating function + aesthetic ('working_base.py' + 'working_fullscreen.py'), but widgets + their function must be changed/added + allergen dictionaries need to be added.
+5. attempted_combination_2.py: Attempts to custom the above ChatGPT template. Having trouble with background alignment & widget placement + fucntion (not taking to next page, maybe can't to other function like storage too etc.)
+           a) attempted_combination.py: A inferior attempt to combine base + fullscreen py's.
+7. page.png series (e.g., home.png, disclaimer.png): Blank versions of the background images.
+8. full_images folder: Contains the complete versions of the background images, envisioning widget aesthetics and placements.
 
 To run and test the project, you’ll need the following libraries installed:  
 - tkinter
@@ -82,17 +84,22 @@ Successful already:
 - Background adjustments: A green background accommodates gaps above and below the `.png`.
 - Key Discovery: My MacBook’s resolution isn’t standard 16:9 (1920x1080), which initially confused me. However, adapting the app to dynamically fit any screen feels more professional since the marker/tutor could open it on any display.
 
-- 🍏Question: If widgets are positioned at specific pixel (x, y) coordinates, will dynamic scaling cause misalignment issues?  
+- 🍏Question: If widgets are positioned at specific pixel (x, y) coordinates, will dynamic scaling cause misalignment issues?
 
 ---
 
 ### Part 3: Current Issues & What I Need Help With (Ranked by Priority)  
-**1. Combining Files (`attempted_combination.py`)**  
-Goal: Merge `working_base.py` and `working_fullscreen.py`.  
+**1. Combining Files (`attempted_combination_2.py`)**  
+Goal: 
+- Merge `working_base.py` and `working_fullscreen.py`.  
 - Retain the functionality of `working_base.py` and `working_fullscreen.py`
-- I have attempted by splitting 'fullscreen' code blocks into 'bases''s structure (into relevant page sections). I.e. replacing and deleting `display_page` blocks with the 'switch' and 'setup' fucntions.
 
-- 🍏Question: Should I revert to a fixed size with NW alignment for better widget stability? Would this make alignment easier to manage long-term, even if it looks less dynamic?  
+- 🍏Question: Should I revert to a fixed size with NW alignment for better widget stability? Would this make alignment easier to manage long-term, even if it looks less dynamic?
+- 🍏Why is print happening but not frame switch? -> in button functions e.g.
+          # DISCLAIMER Button
+    tk.Button(frame, text="🙆‍♀️️DISCLAIMER", command=lambda: switch_to_disclaimer(Frame)).pack(pady=10)
+    print("Navigating to Disclaimer page...") => output is only console print, no root screen change. NOTE: all "display_" has been changed to "switch_to" in "attempt_combination_2.py" file.
+- 🍏Why are screen suddenly unaligned & separated from widgets compared to the ChatGPT template?
 
 **2. Widget Customization (Stretch Goal)**  
 - Customize specific buttons:  
