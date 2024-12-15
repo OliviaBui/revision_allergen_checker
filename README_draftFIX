@@ -61,7 +61,7 @@ Python was selected because of its simplicity and accessibility, making it a gre
 - **Requests**: For making HTTP requests (if applicable).
 - **Pillow**: For image processing.
 
-These dependencies are listed in the `requirements.txt` file located in the root directory of the project.
+These dependencies are listed in the `requirements.txt` file located in the root directory of the project. Navigation should be easy as it uses a simple user-friendly GUI. 
 
 ### Installation and Setup
 1. **Clone the Repository**:
@@ -119,12 +119,25 @@ If you encounter any issues during setup, refer to the [Troubleshooting Section]
    - Paste a list of ingredients into the input box.
    - Click **Add** to check for allergens.
 
-5. **Add/Edit Custom Ingredients**:
-   - Add custom ingredients by typing them into the input box and clicking **Add**.
-   - Edit ingredients by double-clicking the list or using the **Edit** button.
+4. **Tick pre-defined FDA allergen categories to scan for **:
+   - Tick on the checkbox to the left of the ingredient you want to screen for. Tick one or mutiple it is up to you. 
+
+5. **One the same page Add/Edit Custom Ingredients**:
+   - Add custom ingredients by typing them into the input box and clicking **➕Save/edit**.
+   - Edit custom ingredients by double-clicking the list or using the **➕Save/edit** button.
+    - Delete individual custom ingredients by clicking on the ingredient you want to delete in the list box, and then clicking **❌Delete custom ingredients** button.
+    - Reset custom ingredients by clicking **🔄Reset custom ingredients** button.
+
+5. **Analyse for your selcted catgerieis (bpth pre-deifned and custom)**:
+- Analyse for allergens you slected for that screen by clicking the **ANALYSE** button.
 
 6. **View Results**:
-   - The program will display the detected allergens with confidence percentages.
+   - The program will display the detected allergens with confidence percentages under headings of catageoy, correpsosning found allergens, and in decending order of confience percetnages (e.g. Meatls: gold (100%) then nickel (82%))
+     -If not allergens are found the result bxo wil say "no alergens found!" in that same box instead.
+- For longer results lists, the results window can be scrolled. 
+
+6. **Reset the programa, return to home, and do another product**:
+     - To reset and do another prodcut formthe beginning, click the **Do another** button.
 
 ### Example Usage
 - **Input**: Paste a list of ingredients (e.g., from a product label).
@@ -133,15 +146,6 @@ If you encounter any issues during setup, refer to the [Troubleshooting Section]
     ```
 
 - **Output**: The program will highlight any allergens detected in the input list.
-
-### Example Code Snippet:
-```python
-from tkinter import Tk
-from allergen_detector import AllergenChecker
-
-root = Tk()
-checker = AllergenChecker(root)
-root.mainloop()
 
   ## Project Status
 This project is complete and was submitted as part of a university assignment.
