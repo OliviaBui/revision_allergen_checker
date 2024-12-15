@@ -41,6 +41,7 @@ To run and test the project, you’ll need the following libraries installed:
 - PIL (pillow)  
 - fuzzywuzzy
 - requests (re)
+- python-Levenshtein
 
 ---
 
