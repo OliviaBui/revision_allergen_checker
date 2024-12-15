@@ -10,7 +10,7 @@ Main focus: running `.png` background files & correcting widget placement.
 3. 🍏Is merging the functionalities of `working_base.py` and `working_fullscreen.py` feasible, or should I focus on keeping these separate for simplicity?
      a) how do I set a .png background image (that changes with the matching new frame) in the 'working_base.py' file?
 5. 🍏What challenges may I encounter in widget aesthetics and placement on top of the .png background?
-      a) should I give up on pretty checkboxes and go for tKinter checkboxes?😵‍💫
+      a) should I give up on pretty checkboxes and go for tkinter checkboxes?😵‍💫
       b) should I give up on pretty purple button and go for tkinter button?😮‍💨
 6. 🍏Question: Is tailoring 'Do Another' buttons to not wipe ingredients lists worth the effort, or should I just let the application reset and delete any previously entered text whenever going to home (even if it's to 'go back a step')? => this might mean I delete either the '🏠' or 'go back to home' button on the disclaimer & allergen check pages bc they are doubling up visually and functionally if that is the case.
        a)how can I best handle returning to a previous screen without clearing the “enter your ingredients” list - but only for certain buttons? Some button should return to home and CLEAR textbox, but some should NOT CLEAR. Will this be hard to code for? How should I approach this? (probs ask chat gpt....) 
@@ -21,9 +21,10 @@ Main focus: running `.png` background files & correcting widget placement.
 ---
 
 # Note: This is not a proper README. I’m using this document to explain:*  
-1. What I’ve already done successfully (for context).  
-2. Current issues and what I need help with (ranked by priority).  
-3. My plans and next steps from here.  
+1. Required libraries
+2. What I’ve already done successfully (for context).  
+3. Current issues and what I need help with (ranked by priority).  
+4. My plans and next steps from here.  
 
 ---
 
