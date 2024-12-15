@@ -5,18 +5,23 @@ Main focus: running `.png` background files & correcting widget placement.
 ---
 
 ### Quick-View Questions
-1. 🍏Should I revert to a fixed size (with NW alignment) for better widget stability? Would this make alignment easier long-term, even if it’s less dynamic?  
-2. 🍏When positioning widgets at specific pixel (x, y) coordinates, will dynamic fullscreen scaling cause misalignment issues?
-3. 🍏Is merging the functionalities of `working_base.py` and `working_fullscreen.py` feasible, or should I focus on keeping these separate for simplicity?
+1. 🍏Why is print happening but not frame switch? -> in button functions e.g.
+          # DISCLAIMER Button
+    tk.Button(frame, text="🙆‍♀️️DISCLAIMER", command=lambda: switch_to_disclaimer(Frame)).pack(pady=10)
+    print("Navigating to Disclaimer page...") => output is only console print, no root screen change. NOTE: all "display_" has been changed to "switch_to" in "attempt_combination_2.py" file.
+
+2. 🍏Should I revert to a fixed size (with NW alignment) for better widget stability? Would this make alignment easier long-term, even if it’s less dynamic?  
+3. 🍏When positioning widgets at specific pixel (x, y) coordinates, will dynamic fullscreen scaling cause misalignment issues?
+4. 🍏Is merging the functionalities of `working_base.py` and `working_fullscreen.py` feasible, or should I focus on keeping these separate for simplicity?
      a) how do I set a .png background image (that changes with the matching new frame) in the 'working_base.py' file?
 5. 🍏What challenges may I encounter in widget aesthetics and placement on top of the .png background?
       a) should I give up on pretty checkboxes and go for tkinter checkboxes?😵‍💫
       b) should I give up on pretty purple button and go for tkinter button?😮‍💨
 6. 🍏Question: Is tailoring 'Do Another' buttons to not wipe ingredients lists worth the effort, or should I just let the application reset and delete any previously entered text whenever going to home (even if it's to 'go back a step')? => this might mean I delete either the '🏠' or 'go back to home' button on the disclaimer & allergen check pages bc they are doubling up visually and functionally if that is the case.
        a)how can I best handle returning to a previous screen without clearing the “enter your ingredients” list - but only for certain buttons? Some button should return to home and CLEAR textbox, but some should NOT CLEAR. Will this be hard to code for? How should I approach this? (probs ask chat gpt....) 
-9. 🍏Are there better approaches for testing responsiveness on non-standard screen resolutions (e.g., my MacBook’s display)?
-10. 🍏Anything I might be overlooking in this build?
-11. 🍏Any essential tips or thoughts for these steps/documents (relfection, video, README, GitHub)?
+7. 🍏Are there better approaches for testing responsiveness on non-standard screen resolutions (e.g., my MacBook’s display)?
+8. 🍏Anything I might be overlooking in this build?
+9. 🍏Any essential tips or thoughts for these steps/documents (relfection, video, README, GitHub)?
 
 ---
 
