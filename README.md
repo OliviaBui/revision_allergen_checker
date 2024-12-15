@@ -21,14 +21,21 @@ Main focus: running `.png` background files & correcting widget placement.
 ---
 
 # Note: This is not a proper README. I’m using this document to explain:*  
-1. Required libraries
+1. Files outline & required libraries
 2. What I’ve already done successfully (for context).  
 3. Current issues and what I need help with (ranked by priority).  
 4. My plans and next steps from here.  
 
 ---
 
-### Part 1: Required Libraries**
+### Part 1: Files Outline & Required Libraries**
+Files: 
+1. working_base.py: The core functional application (to be submitted as a fallback if needed).
+2. working_fullscreen.py: Code for dynamic full-screen background image fitting, demonstrating the ability to create dynamic backgrounds with widgets layered on top.
+3. attempted_combination.py: A file attempting to combine the core functionality from (1) with the aesthetics of (2). Currently unsuccessful, but this will become the final file if integration succeeds.
+4. page.png series (e.g., home.png, disclaimer.png): Blank versions of the background images.
+5. full_images folder: Contains the complete versions of the background images, envisioning widget aesthetics and placements.
+
 To run and test the project, you’ll need the following libraries installed:  
 - tkinter
 - PIL (pillow)  
@@ -57,7 +64,12 @@ Improvements wanted:
       
 
 **File: `working_fullscreen.py`**   
-This file demonstrates launching the .png's in fullscreen mode.  
+This file demonstrates launching the .png images in fullscreen mode.
+Note: There are two sets of images:
+- Blank series: Stored directly in the directory.
+- Full series: Located in the full_images folder.
+The full series represents the desired appearance of the final design, with widgets placed on top of the background. However, I understand achieving this exact look may not be fully feasible, especially given issues like unattractive checkboxes and unrounded buttons. Using the blank images simplifies the process, as precise alignment with the underlying template is not required.
+
 Successful already: 
 - Dynamic responsiveness: Automatically fits screen width, centered (NSEW alignment), without overflow.  
 - Background adjustments: A green background accommodates gaps above and below the `.png`.
